@@ -180,7 +180,7 @@ export class ReportsService {
       .where('sale.createdAt BETWEEN :startDate AND :endDate', { startDate, endDate })
       .groupBy('sale.sellerId')
       .addGroupBy('user.fullName')
-      .orderBy('totalRevenue', 'DESC')
+      .orderBy('SUM(sale.total)', 'DESC')
       .limit(limit)
       .getRawMany();
 
@@ -250,6 +250,12 @@ export class ReportsService {
       return sum + saleCost;
     }, 0);
 
+    // Calculate total products sold (sum of all item quantities)
+    const totalProductsSold = sales.reduce((sum, sale) => {
+      const saleQuantity = sale.items.reduce((itemSum, item) => itemSum + item.quantity, 0);
+      return sum + saleQuantity;
+    }, 0);
+
     const grossProfit = totalRevenue - totalCost;
     const profitMargin = totalRevenue > 0 ? (grossProfit / totalRevenue) * 100 : 0;
 
@@ -262,6 +268,7 @@ export class ReportsService {
         endDate: endDate.toISOString().split('T')[0],
       },
       totalSales: sales.length,
+      totalProductsSold,
       totalRevenue,
       totalCost,
       grossProfit,

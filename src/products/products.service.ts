@@ -99,6 +99,22 @@ export class ProductsService {
     return this.findOne(id);
   }
 
+  async toggleStatus(id: string): Promise<Product> {
+    // Chercher le produit sans filtre isActive
+    const product = await this.productRepository.findOne({ where: { id } });
+
+    if (!product) {
+      throw new NotFoundException('Produit non trouvé');
+    }
+
+    // Basculer le statut
+    const newStatus = !product.isActive;
+    await this.productRepository.update(id, { isActive: newStatus });
+
+    // Retourner le produit mis à jour
+    return await this.productRepository.findOne({ where: { id } });
+  }
+
   async remove(id: string): Promise<void> {
     const product = await this.findOne(id);
     await this.productRepository.update(id, { isActive: false });

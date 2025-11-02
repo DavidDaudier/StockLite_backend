@@ -277,4 +277,24 @@ export class SalesService {
 
     await this.saleRepository.remove(draft);
   }
+
+  async delete(id: string): Promise<void> {
+    const sale = await this.saleRepository.findOne({
+      where: { id },
+      relations: ['items', 'items.product'],
+    });
+
+    if (!sale) {
+      throw new NotFoundException('Vente non trouvée');
+    }
+
+    // If sale is completed, restore stock for all items
+    if (sale.status === SaleStatus.COMPLETED) {
+      for (const item of sale.items) {
+        await this.productsService.updateStock(item.productId, item.quantity);
+      }
+    }
+
+    await this.saleRepository.remove(sale);
+  }
 }

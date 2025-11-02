@@ -34,8 +34,18 @@ export class SalesController {
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
   ) {
-    const queryStartDate = startDate ? new Date(startDate) : undefined;
-    const queryEndDate = endDate ? new Date(endDate) : undefined;
+    let queryStartDate: Date | undefined = undefined;
+    let queryEndDate: Date | undefined = undefined;
+
+    if (startDate) {
+      const [year, month, day] = startDate.split('-').map(Number);
+      queryStartDate = new Date(year, month - 1, day, 0, 0, 0, 0);
+    }
+
+    if (endDate) {
+      const [year, month, day] = endDate.split('-').map(Number);
+      queryEndDate = new Date(year, month - 1, day, 23, 59, 59, 999);
+    }
 
     const searchSellerId = user.role === 'admin' ? sellerId : user.id;
 
@@ -64,8 +74,18 @@ export class SalesController {
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
   ) {
-    const queryStartDate = startDate ? new Date(startDate) : undefined;
-    const queryEndDate = endDate ? new Date(endDate) : undefined;
+    let queryStartDate: Date | undefined = undefined;
+    let queryEndDate: Date | undefined = undefined;
+
+    if (startDate) {
+      const [year, month, day] = startDate.split('-').map(Number);
+      queryStartDate = new Date(year, month - 1, day, 0, 0, 0, 0);
+    }
+
+    if (endDate) {
+      const [year, month, day] = endDate.split('-').map(Number);
+      queryEndDate = new Date(year, month - 1, day, 23, 59, 59, 999);
+    }
 
     const searchSellerId = user.role === 'admin' ? sellerId : user.id;
 
@@ -99,7 +119,7 @@ export class SalesController {
     return this.salesService.completeDraft(id);
   }
 
-  @Delete(':id')
+  @Delete('draft/:id')
   @ApiOperation({ summary: 'Supprimer un brouillon', description: 'Supprime définitivement un brouillon.' })
   @ApiParam({ name: 'id', description: 'ID du brouillon' })
   @ApiResponse({ status: 200, description: 'Brouillon supprimé avec succès.' })
@@ -107,6 +127,16 @@ export class SalesController {
   @ApiResponse({ status: 401, description: 'Non authentifié.' })
   deleteDraft(@Param('id') id: string) {
     return this.salesService.deleteDraft(id);
+  }
+
+  @Delete(':id')
+  @ApiOperation({ summary: 'Supprimer une vente', description: 'Supprime définitivement une vente et restaure le stock si elle était complétée.' })
+  @ApiParam({ name: 'id', description: 'ID de la vente' })
+  @ApiResponse({ status: 200, description: 'Vente supprimée avec succès.' })
+  @ApiResponse({ status: 404, description: 'Vente non trouvée.' })
+  @ApiResponse({ status: 401, description: 'Non authentifié.' })
+  deleteSale(@Param('id') id: string) {
+    return this.salesService.delete(id);
   }
 
   @Get(':id')

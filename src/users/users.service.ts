@@ -25,9 +25,23 @@ export class UsersService {
     }
 
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+
+    // Set default permissions for sellers if not provided
+    let permissions = createUserDto.permissions;
+    if (createUserDto.role === 'seller' && !permissions) {
+      permissions = {
+        dashboard: true,
+        pos: true,
+        history: true,
+        reports: true,
+        profile: true
+      };
+    }
+
     const user = this.userRepository.create({
       ...createUserDto,
       password: hashedPassword,
+      permissions,
     });
 
     return await this.userRepository.save(user);
@@ -35,14 +49,14 @@ export class UsersService {
 
   async findAll(): Promise<User[]> {
     return await this.userRepository.find({
-      select: ['id', 'username', 'email', 'fullName', 'role', 'isActive', 'createdAt', 'lastLoginAt'],
+      select: ['id', 'username', 'email', 'fullName', 'role', 'isActive', 'permissions', 'createdAt', 'lastLoginAt'],
     });
   }
 
   async findOne(id: string): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { id },
-      select: ['id', 'username', 'email', 'fullName', 'role', 'isActive', 'createdAt', 'lastLoginAt'],
+      select: ['id', 'username', 'email', 'fullName', 'role', 'isActive', 'permissions', 'createdAt', 'lastLoginAt'],
     });
 
     if (!user) {
@@ -63,8 +77,28 @@ export class UsersService {
     return this.findOne(id);
   }
 
+  async toggleActive(id: string): Promise<User> {
+    const user = await this.findOne(id);
+    await this.userRepository.update(id, { isActive: !user.isActive });
+    return this.findOne(id);
+  }
+
   async remove(id: string): Promise<void> {
     const user = await this.findOne(id);
     await this.userRepository.update(id, { isActive: false });
+  }
+
+  async getStats(): Promise<any> {
+    const users = await this.userRepository.find();
+
+    const stats = {
+      total: users.length,
+      admins: users.filter(u => u.role === 'admin').length,
+      sellers: users.filter(u => u.role === 'seller').length,
+      active: users.filter(u => u.isActive).length,
+      inactive: users.filter(u => !u.isActive).length,
+    };
+
+    return stats;
   }
 }

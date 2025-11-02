@@ -1,4 +1,4 @@
-import { IsString, IsEmail, IsNotEmpty, IsEnum, IsOptional } from 'class-validator';
+import { IsString, IsEmail, IsNotEmpty, IsEnum, IsOptional, IsObject } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { UserRole } from '../user.entity';
 
@@ -8,20 +8,20 @@ export class CreateUserDto {
   @IsNotEmpty()
   username: string;
 
-  @ApiProperty({ description: 'Adresse email', example: 'john.doe@example.com' })
+  @ApiPropertyOptional({ description: 'Adresse email', example: 'john.doe@example.com' })
   @IsEmail()
-  @IsNotEmpty()
-  email: string;
+  @IsOptional()
+  email?: string;
 
   @ApiProperty({ description: 'Mot de passe', example: 'SecurePass123!' })
   @IsString()
   @IsNotEmpty()
   password: string;
 
-  @ApiProperty({ description: 'Nom complet', example: 'John Doe' })
+  @ApiPropertyOptional({ description: 'Nom complet', example: 'John Doe' })
   @IsString()
-  @IsNotEmpty()
-  fullName: string;
+  @IsOptional()
+  fullName?: string;
 
   @ApiPropertyOptional({
     description: 'Rôle de l\'utilisateur',
@@ -32,4 +32,24 @@ export class CreateUserDto {
   @IsEnum(UserRole)
   @IsOptional()
   role?: UserRole;
+
+  @ApiPropertyOptional({
+    description: 'Permissions du sidebar pour les vendeurs',
+    example: {
+      dashboard: true,
+      pos: true,
+      history: true,
+      reports: true,
+      profile: true
+    }
+  })
+  @IsObject()
+  @IsOptional()
+  permissions?: {
+    dashboard?: boolean;
+    pos?: boolean;
+    history?: boolean;
+    reports?: boolean;
+    profile?: boolean;
+  };
 }

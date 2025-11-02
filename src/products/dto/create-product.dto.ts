@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsNotEmpty, IsOptional, Min } from 'class-validator';
+import { IsString, IsNumber, IsNotEmpty, IsOptional, Min, IsBoolean } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateProductDto {
@@ -63,4 +63,9 @@ export class CreateProductDto {
   @IsString()
   @IsOptional()
   imageUrl?: string;
+
+  @ApiPropertyOptional({ description: 'Statut d\'activité du produit', example: true })
+  @IsBoolean()
+  @IsOptional()
+  isActive?: boolean;
 }

@@ -15,13 +15,24 @@ export class AuthService {
 
   async validateUser(username: string, password: string): Promise<any> {
     const user = await this.userRepository.findOne({
-      where: { username, isActive: true },
+      where: { username },
     });
 
-    if (user && await bcrypt.compare(password, user.password)) {
+    if (!user) {
+      return null;
+    }
+
+    if (!user.isActive) {
+      return null;
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (isPasswordValid) {
       const { password, ...result } = user;
       return result;
     }
+
     return null;
   }
 
@@ -40,6 +51,7 @@ export class AuthService {
         email: user.email,
         fullName: user.fullName,
         role: user.role,
+        permissions: user.permissions,
       },
     };
   }

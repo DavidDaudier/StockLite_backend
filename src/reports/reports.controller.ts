@@ -24,7 +24,11 @@ export class ReportsController {
   @ApiResponse({ status: 401, description: 'Non authentifié.' })
   @ApiResponse({ status: 403, description: 'Accès refusé - Nécessite le rôle ADMIN ou SELLER.' })
   getDailyReport(@Query('date') date?: string) {
-    const targetDate = date ? new Date(date) : undefined;
+    let targetDate: Date | undefined = undefined;
+    if (date) {
+      const [year, month, day] = date.split('-').map(Number);
+      targetDate = new Date(year, month - 1, day, 0, 0, 0, 0);
+    }
     return this.reportsService.getDailySalesReport(targetDate);
   }
 
@@ -39,7 +43,11 @@ export class ReportsController {
   @ApiResponse({ status: 401, description: 'Non authentifié.' })
   @ApiResponse({ status: 403, description: 'Accès refusé - Nécessite le rôle ADMIN ou SELLER.' })
   getWeeklyReport(@Query('startDate') startDate?: string) {
-    const date = startDate ? new Date(startDate) : undefined;
+    let date: Date | undefined = undefined;
+    if (startDate) {
+      const [year, month, day] = startDate.split('-').map(Number);
+      date = new Date(year, month - 1, day, 0, 0, 0, 0);
+    }
     return this.reportsService.getWeeklySalesReport(date);
   }
 
@@ -78,8 +86,24 @@ export class ReportsController {
     @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
   ) {
     // Si pas de dates fournies, utiliser les 30 derniers jours
-    const end = endDate ? new Date(endDate) : new Date();
-    const start = startDate ? new Date(startDate) : new Date(end.getTime() - 30 * 24 * 60 * 60 * 1000);
+    let end: Date;
+    let start: Date;
+
+    if (endDate) {
+      const [year, month, day] = endDate.split('-').map(Number);
+      end = new Date(year, month - 1, day, 23, 59, 59, 999);
+    } else {
+      end = new Date();
+      end.setHours(23, 59, 59, 999);
+    }
+
+    if (startDate) {
+      const [year, month, day] = startDate.split('-').map(Number);
+      start = new Date(year, month - 1, day, 0, 0, 0, 0);
+    } else {
+      start = new Date(end.getTime() - 30 * 24 * 60 * 60 * 1000);
+      start.setHours(0, 0, 0, 0);
+    }
 
     return this.reportsService.getTopSellingProducts(start, end, limit);
   }
@@ -101,8 +125,24 @@ export class ReportsController {
     @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
   ) {
     // Si pas de dates fournies, utiliser les 30 derniers jours
-    const end = endDate ? new Date(endDate) : new Date();
-    const start = startDate ? new Date(startDate) : new Date(end.getTime() - 30 * 24 * 60 * 60 * 1000);
+    let end: Date;
+    let start: Date;
+
+    if (endDate) {
+      const [year, month, day] = endDate.split('-').map(Number);
+      end = new Date(year, month - 1, day, 23, 59, 59, 999);
+    } else {
+      end = new Date();
+      end.setHours(23, 59, 59, 999);
+    }
+
+    if (startDate) {
+      const [year, month, day] = startDate.split('-').map(Number);
+      start = new Date(year, month - 1, day, 0, 0, 0, 0);
+    } else {
+      start = new Date(end.getTime() - 30 * 24 * 60 * 60 * 1000);
+      start.setHours(0, 0, 0, 0);
+    }
 
     return this.reportsService.getTopSellers(start, end, limit);
   }
@@ -135,8 +175,25 @@ export class ReportsController {
     @Query('endDate') endDate?: string,
   ) {
     // Si pas de dates fournies, utiliser le mois en cours
-    const end = endDate ? new Date(endDate) : new Date();
-    const start = startDate ? new Date(startDate) : new Date(end.getFullYear(), end.getMonth(), 1);
+    let end: Date;
+    let start: Date;
+
+    if (endDate) {
+      // Parse endDate and set time to end of day (23:59:59.999)
+      const [year, month, day] = endDate.split('-').map(Number);
+      end = new Date(year, month - 1, day, 23, 59, 59, 999);
+    } else {
+      end = new Date();
+      end.setHours(23, 59, 59, 999);
+    }
+
+    if (startDate) {
+      // Parse startDate and set time to start of day (00:00:00.000)
+      const [year, month, day] = startDate.split('-').map(Number);
+      start = new Date(year, month - 1, day, 0, 0, 0, 0);
+    } else {
+      start = new Date(end.getFullYear(), end.getMonth(), 1, 0, 0, 0, 0);
+    }
 
     return this.reportsService.getFinancialReport(start, end);
   }

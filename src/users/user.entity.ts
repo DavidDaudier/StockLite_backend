@@ -14,13 +14,13 @@ export class User {
   @Column({ unique: true })
   username: string;
 
-  @Column({ unique: true })
+  @Column({ unique: true, nullable: true })
   email: string;
 
   @Column()
   password: string;
 
-  @Column()
+  @Column({ nullable: true })
   fullName: string;
 
   @Column({
@@ -32,6 +32,15 @@ export class User {
 
   @Column({ default: true })
   isActive: boolean;
+
+  @Column({ type: 'json', nullable: true })
+  permissions: {
+    dashboard?: boolean;
+    pos?: boolean;
+    history?: boolean;
+    reports?: boolean;
+    profile?: boolean;
+  };
 
   @OneToMany(() => Sale, (sale) => sale.seller)
   sales: Sale[];

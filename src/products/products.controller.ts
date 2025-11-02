@@ -74,6 +74,19 @@ export class ProductsController {
     return this.productsService.update(id, updateProductDto);
   }
 
+  @Patch(':id/toggle-status')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Activer/Désactiver un produit', description: 'Bascule le statut actif/inactif d\'un produit. Nécessite le rôle ADMIN.' })
+  @ApiParam({ name: 'id', description: 'ID du produit' })
+  @ApiResponse({ status: 200, description: 'Statut du produit basculé avec succès.' })
+  @ApiResponse({ status: 401, description: 'Non authentifié.' })
+  @ApiResponse({ status: 403, description: 'Accès refusé - Nécessite le rôle ADMIN.' })
+  @ApiResponse({ status: 404, description: 'Produit non trouvé.' })
+  toggleStatus(@Param('id') id: string) {
+    return this.productsService.toggleStatus(id);
+  }
+
   @Delete(':id')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
