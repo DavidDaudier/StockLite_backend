@@ -51,12 +51,21 @@ export class AuthService {
         email: user.email,
         fullName: user.fullName,
         role: user.role,
+        isSuperAdmin: user.isSuperAdmin,
         permissions: user.permissions,
       },
     };
   }
 
-  async register(username: string, email: string, password: string, fullName: string, role?: string) {
+  async register(
+    username: string,
+    email: string,
+    password: string,
+    fullName: string,
+    role?: string,
+    permissions?: any,
+    isSuperAdmin?: boolean
+  ) {
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = this.userRepository.create({
       username,
@@ -64,6 +73,8 @@ export class AuthService {
       password: hashedPassword,
       fullName,
       role: role as any,
+      permissions,
+      isSuperAdmin: isSuperAdmin || false,
     });
 
     await this.userRepository.save(user);

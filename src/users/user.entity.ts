@@ -33,14 +33,11 @@ export class User {
   @Column({ default: true })
   isActive: boolean;
 
+  @Column({ default: false })
+  isSuperAdmin: boolean;
+
   @Column({ type: 'json', nullable: true })
-  permissions: {
-    dashboard?: boolean;
-    pos?: boolean;
-    history?: boolean;
-    reports?: boolean;
-    profile?: boolean;
-  };
+  permissions: any;
 
   @OneToMany(() => Sale, (sale) => sale.seller)
   sales: Sale[];

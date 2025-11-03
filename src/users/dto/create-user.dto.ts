@@ -1,4 +1,4 @@
-import { IsString, IsEmail, IsNotEmpty, IsEnum, IsOptional, IsObject } from 'class-validator';
+import { IsString, IsEmail, IsNotEmpty, IsEnum, IsOptional, IsObject, IsBoolean } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { UserRole } from '../user.entity';
 
@@ -34,7 +34,7 @@ export class CreateUserDto {
   role?: UserRole;
 
   @ApiPropertyOptional({
-    description: 'Permissions du sidebar pour les vendeurs',
+    description: 'Permissions - pour vendeurs: {page: boolean}, pour admins: {page: {create, read, update, delete}}',
     example: {
       dashboard: true,
       pos: true,
@@ -45,11 +45,14 @@ export class CreateUserDto {
   })
   @IsObject()
   @IsOptional()
-  permissions?: {
-    dashboard?: boolean;
-    pos?: boolean;
-    history?: boolean;
-    reports?: boolean;
-    profile?: boolean;
-  };
+  permissions?: any;
+
+  @ApiPropertyOptional({
+    description: 'Marquer comme Super Admin (accès total)',
+    default: false,
+    example: false
+  })
+  @IsBoolean()
+  @IsOptional()
+  isSuperAdmin?: boolean;
 }

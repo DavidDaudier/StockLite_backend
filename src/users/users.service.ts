@@ -1,4 +1,4 @@
-import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
+import { Injectable, ConflictException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
@@ -49,14 +49,14 @@ export class UsersService {
 
   async findAll(): Promise<User[]> {
     return await this.userRepository.find({
-      select: ['id', 'username', 'email', 'fullName', 'role', 'isActive', 'permissions', 'createdAt', 'lastLoginAt'],
+      select: ['id', 'username', 'email', 'fullName', 'role', 'isActive', 'isSuperAdmin', 'permissions', 'createdAt', 'lastLoginAt'],
     });
   }
 
   async findOne(id: string): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { id },
-      select: ['id', 'username', 'email', 'fullName', 'role', 'isActive', 'permissions', 'createdAt', 'lastLoginAt'],
+      select: ['id', 'username', 'email', 'fullName', 'role', 'isActive', 'isSuperAdmin', 'permissions', 'createdAt', 'lastLoginAt'],
     });
 
     if (!user) {
@@ -69,8 +69,20 @@ export class UsersService {
   async update(id: string, updateData: Partial<User>): Promise<User> {
     const user = await this.findOne(id);
 
+    // Protect super admin
+    if (user.isSuperAdmin) {
+      // Prevent modification of isActive or isSuperAdmin fields
+      delete updateData.isActive;
+      delete updateData.isSuperAdmin;
+    }
+
     if (updateData.password) {
       updateData.password = await bcrypt.hash(updateData.password, 10);
+    }
+
+    // Log permissions reçues
+    if (updateData.permissions) {
+      console.log('Backend - Permissions reçues pour user', id, ':', JSON.stringify(updateData.permissions, null, 2));
     }
 
     await this.userRepository.update(id, updateData);
@@ -79,13 +91,28 @@ export class UsersService {
 
   async toggleActive(id: string): Promise<User> {
     const user = await this.findOne(id);
+
+    // Prevent deactivating super admin
+    if (user.isSuperAdmin) {
+      throw new BadRequestException('Impossible de désactiver le Super Admin');
+    }
+
     await this.userRepository.update(id, { isActive: !user.isActive });
     return this.findOne(id);
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(id: string): Promise<{ message: string }> {
     const user = await this.findOne(id);
-    await this.userRepository.update(id, { isActive: false });
+
+    // Prevent deleting super admin
+    if (user.isSuperAdmin) {
+      throw new BadRequestException('Impossible de supprimer le Super Admin');
+    }
+
+    // Vraie suppression de l'utilisateur
+    await this.userRepository.delete(id);
+
+    return { message: 'Utilisateur supprimé avec succès' };
   }
 
   async getStats(): Promise<any> {

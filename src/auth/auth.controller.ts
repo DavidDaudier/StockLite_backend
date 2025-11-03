@@ -31,6 +31,8 @@ export class AuthController {
       createUserDto.password,
       createUserDto.fullName,
       createUserDto.role,
+      createUserDto.permissions,
+      createUserDto.isSuperAdmin,
     );
   }
 }
