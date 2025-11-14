@@ -1,9 +1,10 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, Inject, forwardRef } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User } from '../users/user.entity';
+import { SessionsService } from '../sessions/sessions.service';
 
 @Injectable()
 export class AuthService {
@@ -11,6 +12,8 @@ export class AuthService {
     @InjectRepository(User)
     private userRepository: Repository<User>,
     private jwtService: JwtService,
+    @Inject(forwardRef(() => SessionsService))
+    private sessionsService: SessionsService,
   ) {}
 
   async validateUser(username: string, password: string): Promise<any> {
@@ -36,15 +39,48 @@ export class AuthService {
     return null;
   }
 
-  async login(user: any) {
+  async login(user: any, sessionData?: any) {
+    console.log('🔐 [Auth] Login called for user:', user.username);
+    console.log('📍 [Auth] Session data received:', sessionData);
+
     const payload = { username: user.username, sub: user.id, role: user.role };
 
     await this.userRepository.update(user.id, {
       lastLoginAt: new Date(),
     });
 
+    // Create session with geolocation data
+    let sessionId: string | null = null;
+    if (sessionData) {
+      console.log('✅ [Auth] Creating session for user:', user.username);
+      const { device, browser, os } = this.sessionsService.parseUserAgent(sessionData.userAgent);
+
+      try {
+        const session = await this.sessionsService.create({
+          userId: user.id,
+          ipAddress: sessionData.ipAddress,
+          userAgent: sessionData.userAgent,
+          device,
+          browser,
+          os,
+          latitude: sessionData.latitude,
+          longitude: sessionData.longitude,
+          city: sessionData.city,
+          country: sessionData.country,
+          location: sessionData.location,
+        });
+        sessionId = session.id;
+        console.log('✅ [Auth] Session created successfully:', session.id);
+      } catch (error) {
+        console.error('❌ [Auth] Error creating session:', error);
+      }
+    } else {
+      console.warn('⚠️ [Auth] No session data provided, session not created');
+    }
+
     return {
       access_token: this.jwtService.sign(payload),
+      sessionId,
       user: {
         id: user.id,
         username: user.username,

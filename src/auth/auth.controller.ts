@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Request } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Request, Ip } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
@@ -15,8 +15,22 @@ export class AuthController {
   @ApiOperation({ summary: 'Connexion utilisateur', description: 'Authentifie un utilisateur et retourne un token JWT.' })
   @ApiResponse({ status: 200, description: 'Connexion réussie. Retourne le token JWT et les infos utilisateur.' })
   @ApiResponse({ status: 401, description: 'Identifiants incorrects.' })
-  async login(@Request() req, @Body() loginDto: LoginDto) {
-    return this.authService.login(req.user);
+  @ApiBody({ type: LoginDto })
+  async login(@Request() req, @Body() body: any, @Ip() ipAddress: string) {
+    const userAgent = req.headers['user-agent'] || '';
+
+    // Extract optional geolocation data from body
+    const sessionData = {
+      ipAddress,
+      userAgent,
+      latitude: body.latitude,
+      longitude: body.longitude,
+      city: body.city,
+      country: body.country,
+      location: body.location,
+    };
+
+    return this.authService.login(req.user, sessionData);
   }
 
   @Post('register')

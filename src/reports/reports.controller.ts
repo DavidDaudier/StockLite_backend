@@ -13,6 +13,23 @@ import { UserRole } from '../users/user.entity';
 export class ReportsController {
   constructor(private readonly reportsService: ReportsService) {}
 
+  /**
+   * Helper method to parse date strings supporting both ISO format and simple format
+   */
+  private parseDate(dateString: string, setToEndOfDay: boolean = false): Date {
+    // Support both ISO format (2025-11-06T05:00:00.000Z) and simple format (2025-11-06)
+    const date = new Date(dateString);
+    // Si la date est au format simple, définir l'heure
+    if (!dateString.includes('T')) {
+      if (setToEndOfDay) {
+        date.setHours(23, 59, 59, 999);
+      } else {
+        date.setHours(0, 0, 0, 0);
+      }
+    }
+    return date;
+  }
+
   @Get('daily')
   @Roles(UserRole.ADMIN, UserRole.SELLER)
   @ApiOperation({
@@ -26,8 +43,7 @@ export class ReportsController {
   getDailyReport(@Query('date') date?: string) {
     let targetDate: Date | undefined = undefined;
     if (date) {
-      const [year, month, day] = date.split('-').map(Number);
-      targetDate = new Date(year, month - 1, day, 0, 0, 0, 0);
+      targetDate = this.parseDate(date, false);
     }
     return this.reportsService.getDailySalesReport(targetDate);
   }
@@ -45,8 +61,7 @@ export class ReportsController {
   getWeeklyReport(@Query('startDate') startDate?: string) {
     let date: Date | undefined = undefined;
     if (startDate) {
-      const [year, month, day] = startDate.split('-').map(Number);
-      date = new Date(year, month - 1, day, 0, 0, 0, 0);
+      date = this.parseDate(startDate, false);
     }
     return this.reportsService.getWeeklySalesReport(date);
   }
@@ -90,16 +105,14 @@ export class ReportsController {
     let start: Date;
 
     if (endDate) {
-      const [year, month, day] = endDate.split('-').map(Number);
-      end = new Date(year, month - 1, day, 23, 59, 59, 999);
+      end = this.parseDate(endDate, true);
     } else {
       end = new Date();
       end.setHours(23, 59, 59, 999);
     }
 
     if (startDate) {
-      const [year, month, day] = startDate.split('-').map(Number);
-      start = new Date(year, month - 1, day, 0, 0, 0, 0);
+      start = this.parseDate(startDate, false);
     } else {
       start = new Date(end.getTime() - 30 * 24 * 60 * 60 * 1000);
       start.setHours(0, 0, 0, 0);
@@ -129,16 +142,14 @@ export class ReportsController {
     let start: Date;
 
     if (endDate) {
-      const [year, month, day] = endDate.split('-').map(Number);
-      end = new Date(year, month - 1, day, 23, 59, 59, 999);
+      end = this.parseDate(endDate, true);
     } else {
       end = new Date();
       end.setHours(23, 59, 59, 999);
     }
 
     if (startDate) {
-      const [year, month, day] = startDate.split('-').map(Number);
-      start = new Date(year, month - 1, day, 0, 0, 0, 0);
+      start = this.parseDate(startDate, false);
     } else {
       start = new Date(end.getTime() - 30 * 24 * 60 * 60 * 1000);
       start.setHours(0, 0, 0, 0);
@@ -179,18 +190,14 @@ export class ReportsController {
     let start: Date;
 
     if (endDate) {
-      // Parse endDate and set time to end of day (23:59:59.999)
-      const [year, month, day] = endDate.split('-').map(Number);
-      end = new Date(year, month - 1, day, 23, 59, 59, 999);
+      end = this.parseDate(endDate, true);
     } else {
       end = new Date();
       end.setHours(23, 59, 59, 999);
     }
 
     if (startDate) {
-      // Parse startDate and set time to start of day (00:00:00.000)
-      const [year, month, day] = startDate.split('-').map(Number);
-      start = new Date(year, month - 1, day, 0, 0, 0, 0);
+      start = this.parseDate(startDate, false);
     } else {
       start = new Date(end.getFullYear(), end.getMonth(), 1, 0, 0, 0, 0);
     }

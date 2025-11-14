@@ -12,6 +12,8 @@ async function bootstrap() {
   app.enableCors({
     origin: configService.get<string>('CORS_ORIGINS', 'http://localhost:4200').split(','),
     credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Session-Id'],
+    exposedHeaders: ['X-Session-Id'],
   });
 
   app.useGlobalPipes(

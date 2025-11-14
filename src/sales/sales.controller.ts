@@ -38,13 +38,21 @@ export class SalesController {
     let queryEndDate: Date | undefined = undefined;
 
     if (startDate) {
-      const [year, month, day] = startDate.split('-').map(Number);
-      queryStartDate = new Date(year, month - 1, day, 0, 0, 0, 0);
+      // Support both ISO format (2025-11-06T05:00:00.000Z) and simple format (2025-11-06)
+      queryStartDate = new Date(startDate);
+      // Si la date est au format simple, définir l'heure au début de la journée
+      if (!startDate.includes('T')) {
+        queryStartDate.setHours(0, 0, 0, 0);
+      }
     }
 
     if (endDate) {
-      const [year, month, day] = endDate.split('-').map(Number);
-      queryEndDate = new Date(year, month - 1, day, 23, 59, 59, 999);
+      // Support both ISO format and simple format
+      queryEndDate = new Date(endDate);
+      // Si la date est au format simple, définir l'heure à la fin de la journée
+      if (!endDate.includes('T')) {
+        queryEndDate.setHours(23, 59, 59, 999);
+      }
     }
 
     const searchSellerId = user.role === 'admin' ? sellerId : user.id;
@@ -78,13 +86,21 @@ export class SalesController {
     let queryEndDate: Date | undefined = undefined;
 
     if (startDate) {
-      const [year, month, day] = startDate.split('-').map(Number);
-      queryStartDate = new Date(year, month - 1, day, 0, 0, 0, 0);
+      // Support both ISO format (2025-11-06T05:00:00.000Z) and simple format (2025-11-06)
+      queryStartDate = new Date(startDate);
+      // Si la date est au format simple, définir l'heure au début de la journée
+      if (!startDate.includes('T')) {
+        queryStartDate.setHours(0, 0, 0, 0);
+      }
     }
 
     if (endDate) {
-      const [year, month, day] = endDate.split('-').map(Number);
-      queryEndDate = new Date(year, month - 1, day, 23, 59, 59, 999);
+      // Support both ISO format and simple format
+      queryEndDate = new Date(endDate);
+      // Si la date est au format simple, définir l'heure à la fin de la journée
+      if (!endDate.includes('T')) {
+        queryEndDate.setHours(23, 59, 59, 999);
+      }
     }
 
     const searchSellerId = user.role === 'admin' ? sellerId : user.id;

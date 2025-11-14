@@ -1,34 +1,24 @@
-import { ExtractJwt, Strategy } from 'passport-jwt';
+import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { User } from '../../users/user.entity';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(
-    private configService: ConfigService,
-    @InjectRepository(User)
-    private userRepository: Repository<User>,
-  ) {
+  constructor(private configService: ConfigService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: configService.get<string>('JWT_SECRET'),
+      secretOrKey: configService.get<string>('JWT_SECRET') || 'your-secret-key-here',
     });
   }
 
   async validate(payload: any) {
-    const user = await this.userRepository.findOne({
-      where: { id: payload.sub, isActive: true },
-    });
-
-    if (!user) {
-      throw new UnauthorizedException();
-    }
-
-    return { id: user.id, username: user.username, role: user.role };
+    return {
+      id: payload.sub,
+      username: payload.username,
+      role: payload.role,
+      isSuperAdmin: payload.isSuperAdmin || false,
+    };
   }
 }
