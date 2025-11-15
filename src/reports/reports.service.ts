@@ -5,6 +5,7 @@ import { Sale } from '../sales/sale.entity';
 import { SaleItem } from '../sales/sale-item.entity';
 import { Product } from '../products/product.entity';
 import { User } from '../users/user.entity';
+import { getTodayRange, getStartOfDay, getEndOfDay } from '../common/utils/date.util';
 
 @Injectable()
 export class ReportsService {
@@ -19,13 +20,33 @@ export class ReportsService {
     private userRepository: Repository<User>,
   ) {}
 
+  /**
+   * Génère le rapport des ventes pour un jour donné
+   *
+   * Si aucune date n'est fournie, utilise aujourd'hui.
+   * Utilise les fonctions utilitaires pour garantir les limites exactes du jour.
+   *
+   * @param date - (Optionnel) Date pour laquelle générer le rapport
+   * @returns Rapport détaillé des ventes du jour
+   */
   async getDailySalesReport(date?: Date) {
-    const targetDate = date || new Date();
-    const startOfDay = new Date(targetDate);
-    startOfDay.setHours(0, 0, 0, 0);
+    let startOfDay: Date;
+    let endOfDay: Date;
 
-    const endOfDay = new Date(targetDate);
-    endOfDay.setHours(23, 59, 59, 999);
+    if (date) {
+      // Si une date spécifique est fournie, utiliser ses limites de jour
+      startOfDay = getStartOfDay(date);
+      endOfDay = getEndOfDay(date);
+    } else {
+      // Sinon, utiliser aujourd'hui avec getTodayRange()
+      const todayRange = getTodayRange();
+      startOfDay = todayRange.startOfDay;
+      endOfDay = todayRange.endOfDay;
+    }
+
+    console.log('📊 [getDailySalesReport] Génération du rapport:');
+    console.log(`   - Début: ${startOfDay.toISOString()}`);
+    console.log(`   - Fin: ${endOfDay.toISOString()}`);
 
     const sales = await this.saleRepository.find({
       where: {
@@ -50,7 +71,7 @@ export class ReportsService {
     }, {} as Record<string, { count: number; total: number }>);
 
     return {
-      date: targetDate.toISOString().split('T')[0],
+      date: startOfDay.toISOString().split('T')[0],
       totalSales,
       totalRevenue,
       totalDiscount,

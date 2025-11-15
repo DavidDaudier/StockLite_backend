@@ -38,24 +38,46 @@ export class SalesController {
     let queryEndDate: Date | undefined = undefined;
 
     if (startDate) {
-      // Support both ISO format (2025-11-06T05:00:00.000Z) and simple format (2025-11-06)
-      queryStartDate = new Date(startDate);
-      // Si la date est au format simple, définir l'heure au début de la journée
-      if (!startDate.includes('T')) {
-        queryStartDate.setHours(0, 0, 0, 0);
+      // Parser correctement la date pour éviter les problèmes de fuseau horaire
+      if (startDate.includes('T')) {
+        // Format ISO complet
+        queryStartDate = new Date(startDate);
+      } else {
+        // Format simple YYYY-MM-DD : créer la date en heure locale
+        const [year, month, day] = startDate.split('-').map(Number);
+        queryStartDate = new Date(year, month - 1, day, 0, 0, 0, 0);
       }
+      console.log(`📅 [SalesController] startDate reçu: ${startDate}, parsé: ${queryStartDate.toISOString()}`);
     }
 
     if (endDate) {
-      // Support both ISO format and simple format
-      queryEndDate = new Date(endDate);
-      // Si la date est au format simple, définir l'heure à la fin de la journée
-      if (!endDate.includes('T')) {
-        queryEndDate.setHours(23, 59, 59, 999);
+      // Parser correctement la date pour éviter les problèmes de fuseau horaire
+      if (endDate.includes('T')) {
+        // Format ISO complet
+        queryEndDate = new Date(endDate);
+      } else {
+        // Format simple YYYY-MM-DD : créer la date en heure locale
+        const [year, month, day] = endDate.split('-').map(Number);
+        queryEndDate = new Date(year, month - 1, day, 23, 59, 59, 999);
       }
+      console.log(`📅 [SalesController] endDate reçu: ${endDate}, parsé: ${queryEndDate.toISOString()}`);
     }
 
-    const searchSellerId = user.role === 'admin' ? sellerId : user.id;
+    // Déterminer le sellerId à utiliser pour le filtre
+    let searchSellerId: string | undefined;
+
+    if (user.isSuperAdmin) {
+      // Super Admin : peut voir toutes les ventes ou filtrer par vendeur spécifique
+      searchSellerId = sellerId; // undefined = toutes les ventes, sinon filtre par ID
+    } else if (user.role === 'admin') {
+      // Admin simple : peut voir toutes les ventes ou filtrer par vendeur spécifique
+      searchSellerId = sellerId;
+    } else {
+      // Vendeur : voit uniquement ses propres ventes
+      searchSellerId = user.id;
+    }
+
+    console.log(`🔍 [SalesController] Filtre sellerId: ${searchSellerId || 'TOUTES LES VENTES'} (user: ${user.username}, role: ${user.role}, isSuperAdmin: ${user.isSuperAdmin})`);
 
     return this.salesService.findAll(searchSellerId, queryStartDate, queryEndDate);
   }
@@ -86,24 +108,46 @@ export class SalesController {
     let queryEndDate: Date | undefined = undefined;
 
     if (startDate) {
-      // Support both ISO format (2025-11-06T05:00:00.000Z) and simple format (2025-11-06)
-      queryStartDate = new Date(startDate);
-      // Si la date est au format simple, définir l'heure au début de la journée
-      if (!startDate.includes('T')) {
-        queryStartDate.setHours(0, 0, 0, 0);
+      // Parser correctement la date pour éviter les problèmes de fuseau horaire
+      if (startDate.includes('T')) {
+        // Format ISO complet
+        queryStartDate = new Date(startDate);
+      } else {
+        // Format simple YYYY-MM-DD : créer la date en heure locale
+        const [year, month, day] = startDate.split('-').map(Number);
+        queryStartDate = new Date(year, month - 1, day, 0, 0, 0, 0);
       }
+      console.log(`📅 [SalesController] startDate reçu: ${startDate}, parsé: ${queryStartDate.toISOString()}`);
     }
 
     if (endDate) {
-      // Support both ISO format and simple format
-      queryEndDate = new Date(endDate);
-      // Si la date est au format simple, définir l'heure à la fin de la journée
-      if (!endDate.includes('T')) {
-        queryEndDate.setHours(23, 59, 59, 999);
+      // Parser correctement la date pour éviter les problèmes de fuseau horaire
+      if (endDate.includes('T')) {
+        // Format ISO complet
+        queryEndDate = new Date(endDate);
+      } else {
+        // Format simple YYYY-MM-DD : créer la date en heure locale
+        const [year, month, day] = endDate.split('-').map(Number);
+        queryEndDate = new Date(year, month - 1, day, 23, 59, 59, 999);
       }
+      console.log(`📅 [SalesController] endDate reçu: ${endDate}, parsé: ${queryEndDate.toISOString()}`);
     }
 
-    const searchSellerId = user.role === 'admin' ? sellerId : user.id;
+    // Déterminer le sellerId à utiliser pour le filtre (même logique que findAll)
+    let searchSellerId: string | undefined;
+
+    if (user.isSuperAdmin) {
+      // Super Admin : peut voir toutes les stats ou filtrer par vendeur spécifique
+      searchSellerId = sellerId;
+    } else if (user.role === 'admin') {
+      // Admin simple : peut voir toutes les stats ou filtrer par vendeur spécifique
+      searchSellerId = sellerId;
+    } else {
+      // Vendeur : voit uniquement ses propres stats
+      searchSellerId = user.id;
+    }
+
+    console.log(`🔍 [SalesController/stats] Filtre sellerId: ${searchSellerId || 'TOUTES LES STATS'}`);
 
     return this.salesService.getSalesStats(searchSellerId, queryStartDate, queryEndDate);
   }

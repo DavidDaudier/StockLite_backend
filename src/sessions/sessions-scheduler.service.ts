@@ -20,7 +20,7 @@ export class SessionsSchedulerService {
 
   
   async expireInactiveSessions() {
-    const inactiveMinutes = 3; // Session expire après 30 minutes d'inactivité, maintenant je met 3, pour 3 minutes de test
+    const inactiveMinutes = 30; // Session expire après 30 minutes d'inactivité, maintenant je met 3, pour 3 minutes de test
 
     console.log(`🔄 [Scheduler] Checking for inactive sessions (inactive > ${inactiveMinutes} min)...`);
 

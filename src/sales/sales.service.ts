@@ -5,6 +5,7 @@ import { Sale, SaleStatus } from './sale.entity';
 import { SaleItem } from './sale-item.entity';
 import { CreateSaleDto } from './dto/create-sale.dto';
 import { ProductsService } from '../products/products.service';
+import { getTodayRange } from '../common/utils/date.util';
 
 @Injectable()
 export class SalesService {
@@ -112,12 +113,22 @@ export class SalesService {
     return sale;
   }
 
+  /**
+   * Récupère toutes les ventes d'aujourd'hui
+   *
+   * Cette méthode utilise getTodayRange() pour garantir que seules
+   * les ventes du jour actuel (de 00:00:00.000 à 23:59:59.999) sont retournées.
+   *
+   * @param sellerId - (Optionnel) ID du vendeur pour filtrer les ventes
+   * @returns Promise<Sale[]> - Liste des ventes d'aujourd'hui
+   */
   async getTodaySales(sellerId?: string): Promise<Sale[]> {
-    const startOfDay = new Date();
-    startOfDay.setHours(0, 0, 0, 0);
+    // Utiliser la fonction utilitaire pour obtenir les limites exactes du jour
+    const { startOfDay, endOfDay } = getTodayRange();
 
-    const endOfDay = new Date();
-    endOfDay.setHours(23, 59, 59, 999);
+    console.log('📅 [getTodaySales] Récupération des ventes du jour:');
+    console.log(`   - Début: ${startOfDay.toISOString()}`);
+    console.log(`   - Fin: ${endOfDay.toISOString()}`);
 
     return this.findAll(sellerId, startOfDay, endOfDay);
   }
