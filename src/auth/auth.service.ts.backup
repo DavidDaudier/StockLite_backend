@@ -43,7 +43,7 @@ export class AuthService {
     console.log('🔐 [Auth] Login called for user:', user.username);
     console.log('📍 [Auth] Session data received:', sessionData);
 
-    const payload = { username: user.username, sub: user.id, role: user.role, isSuperAdmin: user.isSuperAdmin || false };
+    const payload = { username: user.username, sub: user.id, role: user.role };
 
     await this.userRepository.update(user.id, {
       lastLoginAt: new Date(),

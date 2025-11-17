@@ -59,4 +59,17 @@ export class SyncGateway implements OnGatewayConnection, OnGatewayDisconnect {
   notifyLowStock(product: any) {
     this.server.emit('low-stock-alert', product);
   }
+
+  // Notifications pour les demandes de suppression
+  notifyNewDeletionRequest(request: any) {
+    this.server.emit('new-deletion-request', request);
+  }
+
+  notifyDeletionRequestApproved(request: any) {
+    this.server.emit('deletion-request-approved', request);
+  }
+
+  notifyDeletionRequestRejected(request: any) {
+    this.server.emit('deletion-request-rejected', request);
+  }
 }

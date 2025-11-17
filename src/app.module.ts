@@ -24,6 +24,8 @@ import { InventoryItem } from './inventories/inventory-item.entity';
 import { Session } from './sessions/session.entity';
 import { ReceivedSheetConfigModule } from './received-sheet-config/received-sheet-config.module';
 import { ReceivedSheetConfig } from './received-sheet-config/entities/received-sheet-config.entity';
+import { DeletionRequestsModule } from './deletion-requests/deletion-requests.module';
+import { DeletionRequest } from './deletion-requests/deletion-request.entity';
 
 @Module({
   imports: [
@@ -40,7 +42,7 @@ import { ReceivedSheetConfig } from './received-sheet-config/entities/received-s
         username: configService.get<string>('DB_USERNAME', 'stocklite'),
         password: configService.get<string>('DB_PASSWORD', 'stocklite123'),
         database: configService.get<string>('DB_DATABASE', 'stocklite_db'),
-        entities: [User, Product, Sale, SaleItem, Category, AppInfo, Inventory, InventoryItem, Session, ReceivedSheetConfig],
+        entities: [User, Product, Sale, SaleItem, Category, AppInfo, Inventory, InventoryItem, Session, ReceivedSheetConfig, DeletionRequest],
         synchronize: true,
         logging: false,
       }),
@@ -57,6 +59,7 @@ import { ReceivedSheetConfig } from './received-sheet-config/entities/received-s
     InventoriesModule,
     SessionsModule,
     ReceivedSheetConfigModule,
+    DeletionRequestsModule,
   ],
 })
 export class AppModule implements NestModule {
