@@ -26,6 +26,10 @@ import { ReceivedSheetConfigModule } from './received-sheet-config/received-shee
 import { ReceivedSheetConfig } from './received-sheet-config/entities/received-sheet-config.entity';
 import { DeletionRequestsModule } from './deletion-requests/deletion-requests.module';
 import { DeletionRequest } from './deletion-requests/deletion-request.entity';
+import { UserLanguagesModule } from './user-languages/user-languages.module';
+import { UserLanguage } from './user-languages/user-language.entity';
+import { NotificationsModule } from './notifications/notifications.module';
+import { Notification } from './notifications/notification.entity';
 
 @Module({
   imports: [
@@ -42,7 +46,7 @@ import { DeletionRequest } from './deletion-requests/deletion-request.entity';
         username: configService.get<string>('DB_USERNAME', 'stocklite'),
         password: configService.get<string>('DB_PASSWORD', 'stocklite123'),
         database: configService.get<string>('DB_DATABASE', 'stocklite_db'),
-        entities: [User, Product, Sale, SaleItem, Category, AppInfo, Inventory, InventoryItem, Session, ReceivedSheetConfig, DeletionRequest],
+        entities: [User, Product, Sale, SaleItem, Category, AppInfo, Inventory, InventoryItem, Session, ReceivedSheetConfig, DeletionRequest, UserLanguage, Notification],
         synchronize: true,
         logging: false,
       }),
@@ -60,6 +64,8 @@ import { DeletionRequest } from './deletion-requests/deletion-request.entity';
     SessionsModule,
     ReceivedSheetConfigModule,
     DeletionRequestsModule,
+    UserLanguagesModule,
+    NotificationsModule,
   ],
 })
 export class AppModule implements NestModule {

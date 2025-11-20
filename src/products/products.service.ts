@@ -120,11 +120,21 @@ export class ProductsService {
     await this.productRepository.update(id, { isActive: false });
   }
 
-  async getLowStockProducts(): Promise<Product[]> {
-    return await this.productRepository
+  async getLowStockProducts(): Promise<any[]> {
+    const products = await this.productRepository
       .createQueryBuilder('product')
       .where('product.isActive = :isActive', { isActive: true })
       .andWhere('product.quantity <= product.minStock')
       .getMany();
+
+    // Map to frontend expected format
+    return products.map(product => ({
+      id: product.id,
+      name: product.name,
+      barcode: product.barcode,
+      currentStock: product.quantity,
+      minStockLevel: product.minStock,
+      categoryName: product.category
+    }));
   }
 }
