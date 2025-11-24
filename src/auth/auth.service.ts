@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User } from '../users/user.entity';
 import { SessionsService } from '../sessions/sessions.service';
+import { AuditLogsService } from '../audit-logs/audit-logs.service';
 
 @Injectable()
 export class AuthService {
@@ -14,6 +15,7 @@ export class AuthService {
     private jwtService: JwtService,
     @Inject(forwardRef(() => SessionsService))
     private sessionsService: SessionsService,
+    private auditLogsService: AuditLogsService,
   ) {}
 
   async validateUser(username: string, password: string): Promise<any> {
@@ -78,6 +80,26 @@ export class AuthService {
       console.warn('⚠️ [Auth] No session data provided, session not created');
     }
 
+    // Log the login action
+    try {
+      await this.auditLogsService.create({
+        userId: user.id,
+        username: user.username,
+        role: user.role,
+        action: 'login',
+        module: 'Auth',
+        subject: 'Connexion au système',
+        browser: sessionData?.userAgent || 'Unknown',
+        ipAddress: sessionData?.ipAddress || 'Unknown',
+        details: {
+          sessionId,
+          location: sessionData?.location || 'Unknown'
+        }
+      });
+    } catch (error) {
+      console.error('Error logging login action:', error);
+    }
+
     return {
       access_token: this.jwtService.sign(payload),
       sessionId,
@@ -114,6 +136,27 @@ export class AuthService {
     });
 
     await this.userRepository.save(user);
+    
+    // Log the registration action
+    try {
+      await this.auditLogsService.create({
+        userId: user.id,
+        username: user.username,
+        role: user.role,
+        action: 'add',
+        module: 'Utilisateurs',
+        subject: `Création utilisateur ${username}`,
+        browser: 'System',
+        details: {
+          email,
+          fullName,
+          role
+        }
+      });
+    } catch (error) {
+      console.error('Error logging registration action:', error);
+    }
+    
     const { password: _, ...result } = user;
     return result;
   }

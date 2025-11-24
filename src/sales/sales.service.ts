@@ -6,6 +6,7 @@ import { SaleItem } from './sale-item.entity';
 import { CreateSaleDto } from './dto/create-sale.dto';
 import { ProductsService } from '../products/products.service';
 import { getTodayRange } from '../common/utils/date.util';
+import { AuditLogsService } from '../audit-logs/audit-logs.service';
 
 @Injectable()
 export class SalesService {
@@ -15,9 +16,10 @@ export class SalesService {
     @InjectRepository(SaleItem)
     private saleItemRepository: Repository<SaleItem>,
     private productsService: ProductsService,
+    private auditLogsService: AuditLogsService,
   ) {}
 
-  async create(createSaleDto: CreateSaleDto, sellerId: string): Promise<Sale> {
+  async create(createSaleDto: CreateSaleDto, sellerId: string, request?: any): Promise<Sale> {
     let subtotal = 0;
     const saleItems: Partial<SaleItem>[] = [];
 
@@ -75,7 +77,34 @@ export class SalesService {
       await this.saleItemRepository.save(item);
     }
 
-    return await this.findOne(savedSale.id);
+    const fullSale = await this.findOne(savedSale.id);
+
+    // Log the sale action
+    try {
+      await this.auditLogsService.create({
+        userId: sellerId,
+        username: fullSale.seller?.username || 'Unknown',
+        role: fullSale.seller?.role || 'seller',
+        action: 'sale',
+        module: 'Vente',
+        subject: `Vente ${saleNumber} - ${createSaleDto.items.length} produit(s)`,
+        browser: request?.headers?.['user-agent'] || 'Unknown',
+        ipAddress: request?.ip || 'Unknown',
+        details: {
+          after: {
+            saleId: fullSale.id,
+            saleNumber: fullSale.saleNumber,
+            total: fullSale.total,
+            itemCount: fullSale.items.length,
+            paymentMethod: fullSale.paymentMethod
+          }
+        }
+      });
+    } catch (error) {
+      console.error('Error logging sale action:', error);
+    }
+
+    return fullSale;
   }
 
   async findAll(

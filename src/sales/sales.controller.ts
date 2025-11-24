@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Query, UseGuards, Patch, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query, UseGuards, Patch, Delete, Request } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiQuery, ApiParam, ApiBody } from '@nestjs/swagger';
 import { SalesService } from './sales.service';
 import { CreateSaleDto } from './dto/create-sale.dto';
@@ -17,8 +17,8 @@ export class SalesController {
   @ApiResponse({ status: 201, description: 'Vente créée avec succès.' })
   @ApiResponse({ status: 400, description: 'Données invalides ou stock insuffisant.' })
   @ApiResponse({ status: 401, description: 'Non authentifié.' })
-  create(@Body() createSaleDto: CreateSaleDto, @CurrentUser() user: any) {
-    return this.salesService.create(createSaleDto, user.id);
+  create(@Body() createSaleDto: CreateSaleDto, @CurrentUser() user: any, @Request() req: any) {
+    return this.salesService.create(createSaleDto, user.id, req);
   }
 
   @Get()

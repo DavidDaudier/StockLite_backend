@@ -9,6 +9,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
 import { User } from '../users/user.entity';
 import { SessionsModule } from '../sessions/sessions.module';
+import { AuditLogsModule } from '../audit-logs/audit-logs.module';
 
 @Global()
 @Module({
@@ -24,6 +25,7 @@ import { SessionsModule } from '../sessions/sessions.module';
       inject: [ConfigService],
     }),
     forwardRef(() => SessionsModule),
+    AuditLogsModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, LocalStrategy],

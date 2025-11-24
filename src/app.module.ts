@@ -30,6 +30,8 @@ import { UserLanguagesModule } from './user-languages/user-languages.module';
 import { UserLanguage } from './user-languages/user-language.entity';
 import { NotificationsModule } from './notifications/notifications.module';
 import { Notification } from './notifications/notification.entity';
+import { AuditLogsModule } from './audit-logs/audit-logs.module';
+import { AuditLog } from './audit-logs/audit-log.entity';
 
 @Module({
   imports: [
@@ -46,7 +48,7 @@ import { Notification } from './notifications/notification.entity';
         username: configService.get<string>('DB_USERNAME', 'stocklite'),
         password: configService.get<string>('DB_PASSWORD', 'stocklite123'),
         database: configService.get<string>('DB_DATABASE', 'stocklite_db'),
-        entities: [User, Product, Sale, SaleItem, Category, AppInfo, Inventory, InventoryItem, Session, ReceivedSheetConfig, DeletionRequest, UserLanguage, Notification],
+        entities: [User, Product, Sale, SaleItem, Category, AppInfo, Inventory, InventoryItem, Session, ReceivedSheetConfig, DeletionRequest, UserLanguage, Notification, AuditLog],
         synchronize: true,
         logging: false,
       }),
@@ -66,6 +68,7 @@ import { Notification } from './notifications/notification.entity';
     DeletionRequestsModule,
     UserLanguagesModule,
     NotificationsModule,
+    AuditLogsModule,
   ],
 })
 export class AppModule implements NestModule {

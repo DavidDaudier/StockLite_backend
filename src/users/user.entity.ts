@@ -4,6 +4,7 @@ import { Sale } from '../sales/sale.entity';
 export enum UserRole {
   ADMIN = 'admin',
   SELLER = 'seller',
+  SUPERADMIN = 'superadmin',
 }
 
 @Entity('users')
