@@ -16,6 +16,10 @@ async function bootstrap() {
     exposedHeaders: ['X-Session-Id'],
   });
 
+  // Augmenter la limite de taille du body pour les uploads d'images en base64
+  app.use(require('express').json({ limit: '10mb' }));
+  app.use(require('express').urlencoded({ limit: '10mb', extended: true }));
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
