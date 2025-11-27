@@ -41,4 +41,28 @@ export class CreateAppInfoDto {
   @IsString()
   @IsOptional()
   color_tertiary?: string;
+
+  @ApiPropertyOptional({ description: 'Application subtitle', example: 'POS System' })
+  @IsString()
+  @IsOptional()
+  sous_titre_app?: string;
+
+  @ApiPropertyOptional({ description: 'Logo size (percentage)', example: 100 })
+  @IsOptional()
+  logo_size?: number;
+
+  @ApiPropertyOptional({ description: 'Application name text color (hex)', example: '#000000' })
+  @IsString()
+  @IsOptional()
+  color_nom_app?: string;
+
+  @ApiPropertyOptional({ description: 'Application subtitle text color (hex)', example: '#6B7280' })
+  @IsString()
+  @IsOptional()
+  color_sous_titre_app?: string;
+
+  @ApiPropertyOptional({ description: 'Logo background color (hex or "transparent")', example: '#0d9488' })
+  @IsString()
+  @IsOptional()
+  logo_bg_color?: string;
 }

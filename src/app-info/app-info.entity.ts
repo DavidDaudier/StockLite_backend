@@ -29,6 +29,24 @@ export class AppInfo {
   @Column({ nullable: true })
   color_tertiary: string;
 
+  @Column({ nullable: true })
+  sous_titre_app: string;
+
+  @Column({ type: 'int', nullable: true, default: 100 })
+  logo_size: number;
+
+  @Column({ nullable: true })
+  color_nom_app: string;
+
+  @Column({ nullable: true })
+  color_sous_titre_app: string;
+
+  @Column({ nullable: true, default: '#0d9488' })
+  logo_bg_color: string;
+
+  @Column({ nullable: true, default: 'HTG' })
+  currency: string;
+
   @CreateDateColumn()
   createdAt: Date;
 
