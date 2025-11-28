@@ -29,7 +29,7 @@ export class ReportsService {
    * @param date - (Optionnel) Date pour laquelle générer le rapport
    * @returns Rapport détaillé des ventes du jour
    */
-  async getDailySalesReport(date?: Date) {
+  async getDailySalesReport(date?: Date, sellerId?: string) {
     let startOfDay: Date;
     let endOfDay: Date;
 
@@ -47,11 +47,18 @@ export class ReportsService {
     console.log('📊 [getDailySalesReport] Génération du rapport:');
     console.log(`   - Début: ${startOfDay.toISOString()}`);
     console.log(`   - Fin: ${endOfDay.toISOString()}`);
+    console.log(`   - SellerId: ${sellerId || 'Tous'}`);
+
+    const whereClause: any = {
+      createdAt: Between(startOfDay, endOfDay),
+    };
+
+    if (sellerId) {
+      whereClause.seller = { id: sellerId };
+    }
 
     const sales = await this.saleRepository.find({
-      where: {
-        createdAt: Between(startOfDay, endOfDay),
-      },
+      where: whereClause,
       relations: ['items', 'items.product', 'seller'],
     });
 

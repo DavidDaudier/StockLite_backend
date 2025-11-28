@@ -1,4 +1,4 @@
-import { Controller, Get, Query, UseGuards, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards, ParseIntPipe, Req } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import { ReportsService } from './reports.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
@@ -40,12 +40,16 @@ export class ReportsController {
   @ApiResponse({ status: 200, description: 'Rapport journalier récupéré avec succès.' })
   @ApiResponse({ status: 401, description: 'Non authentifié.' })
   @ApiResponse({ status: 403, description: 'Accès refusé - Nécessite le rôle ADMIN ou SELLER.' })
-  getDailyReport(@Query('date') date?: string) {
+  getDailyReport(@Query('date') date?: string, @Req() req?: any) {
     let targetDate: Date | undefined = undefined;
     if (date) {
       targetDate = this.parseDate(date, false);
     }
-    return this.reportsService.getDailySalesReport(targetDate);
+
+    const user = req?.user;
+    const sellerId = user?.role === UserRole.SELLER ? user.id : undefined;
+
+    return this.reportsService.getDailySalesReport(targetDate, sellerId);
   }
 
   @Get('weekly')

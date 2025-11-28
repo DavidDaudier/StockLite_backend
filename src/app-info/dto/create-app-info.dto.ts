@@ -65,4 +65,9 @@ export class CreateAppInfoDto {
   @IsString()
   @IsOptional()
   logo_bg_color?: string;
+
+  @ApiPropertyOptional({ description: 'Currency code (HTG or USD)', example: 'HTG' })
+  @IsString()
+  @IsOptional()
+  currency?: string;
 }
