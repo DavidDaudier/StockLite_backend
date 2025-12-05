@@ -22,7 +22,7 @@ export class SessionsController {
   }
 
   @Get()
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Get all sessions' })
   @ApiResponse({ status: 200, description: 'Return all sessions' })
   findAll() {
@@ -30,7 +30,7 @@ export class SessionsController {
   }
 
   @Get('active')
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Get all active sessions' })
   @ApiResponse({ status: 200, description: 'Return all active sessions' })
   findActiveSessions() {
@@ -45,7 +45,7 @@ export class SessionsController {
   }
 
   @Get('date-range')
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Get sessions by date range' })
   @ApiResponse({ status: 200, description: 'Return sessions in date range' })
   findByDateRange(

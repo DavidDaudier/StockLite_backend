@@ -27,7 +27,7 @@ export class UsersController {
   }
 
   @Get()
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Récupérer tous les utilisateurs', description: 'Récupère la liste de tous les utilisateurs. Nécessite le rôle ADMIN.' })
   @ApiResponse({ status: 200, description: 'Liste des utilisateurs récupérée avec succès.' })
   @ApiResponse({ status: 401, description: 'Non authentifié.' })
@@ -37,7 +37,7 @@ export class UsersController {
   }
 
   @Get('stats')
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Récupérer les statistiques des utilisateurs', description: 'Récupère les statistiques (total, admins, vendeurs, actifs, inactifs). Nécessite le rôle ADMIN.' })
   @ApiResponse({ status: 200, description: 'Statistiques récupérées avec succès.' })
   @ApiResponse({ status: 401, description: 'Non authentifié.' })
@@ -94,5 +94,19 @@ export class UsersController {
   @ApiResponse({ status: 404, description: 'Utilisateur non trouvé.' })
   remove(@Param('id') id: string) {
     return this.usersService.remove(id);
+  }
+
+  @Patch(':id/password')
+  @ApiOperation({ summary: 'Changer le mot de passe', description: 'Change le mot de passe d\'un utilisateur après vérification du mot de passe actuel.' })
+  @ApiParam({ name: 'id', description: 'ID de l\'utilisateur' })
+  @ApiResponse({ status: 200, description: 'Mot de passe modifié avec succès.' })
+  @ApiResponse({ status: 400, description: 'Mot de passe actuel incorrect.' })
+  @ApiResponse({ status: 401, description: 'Non authentifié.' })
+  @ApiResponse({ status: 404, description: 'Utilisateur non trouvé.' })
+  changePassword(
+    @Param('id') id: string,
+    @Body() body: { currentPassword: string; newPassword: string },
+  ) {
+    return this.usersService.changePassword(id, body.currentPassword, body.newPassword);
   }
 }

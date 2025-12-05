@@ -175,8 +175,8 @@ export class SalesController {
   @ApiResponse({ status: 200, description: 'Brouillon finalisé avec succès.' })
   @ApiResponse({ status: 404, description: 'Brouillon non trouvé.' })
   @ApiResponse({ status: 401, description: 'Non authentifié.' })
-  completeDraft(@Param('id') id: string) {
-    return this.salesService.completeDraft(id);
+  completeDraft(@Param('id') id: string, @Body() completeDto?: { paymentMethod?: string; customerName?: string; customerPhone?: string; notes?: string }) {
+    return this.salesService.completeDraft(id, completeDto);
   }
 
   @Delete('draft/:id')

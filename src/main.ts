@@ -62,15 +62,17 @@ async function bootstrap() {
   });
 
   const port = configService.get<number>('PORT', 3000);
-  await app.listen(port);
+  const host = '0.0.0.0'; // Écouter sur toutes les interfaces réseau
+  await app.listen(port, host);
 
   console.log(`
     ╔═════════════════════════════════════════════════════════╗
     ║                                                         ║
     ║         StockLite Backend API Started                   ║
     ║                                                         ║
-    ║   Server running on: http://localhost:${port}           ║
-    ║   API Base URL: http://localhost:${port}/api            ║
+    ║   Server running on: http://0.0.0.0:${port}             ║
+    ║   Local: http://localhost:${port}/api                   ║
+    ║   Network: http://10.79.235.31:${port}/api              ║
     ║   Swagger Docs: http://localhost:${port}/api/docs       ║
     ║                                                         ║
     ╚═════════════════════════════════════════════════════════╝

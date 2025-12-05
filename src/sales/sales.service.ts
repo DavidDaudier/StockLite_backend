@@ -122,11 +122,17 @@ export class SalesService {
       where.createdAt = Between(startDate, endDate);
     }
 
-    return await this.saleRepository.find({
+    const sales = await this.saleRepository.find({
       where,
       relations: ['items', 'items.product', 'seller'],
       order: { createdAt: 'DESC' },
     });
+
+    console.log(`📊 findAll - Query params: sellerId=${sellerId}, startDate=${startDate}, endDate=${endDate}`);
+    console.log(`📊 findAll - Found ${sales.length} sales.`);
+    sales.forEach(s => console.log(`   - Sale ${s.saleNumber}: status=${s.status}, sellerId=${s.sellerId}`));
+
+    return sales;
   }
 
   async findOne(id: string): Promise<Sale> {
@@ -273,7 +279,7 @@ export class SalesService {
     return await this.findOne(savedSale.id);
   }
 
-  async completeDraft(id: string): Promise<Sale> {
+  async completeDraft(id: string, completeDto?: { paymentMethod?: string; customerName?: string; customerPhone?: string; notes?: string }): Promise<Sale> {
     const draft = await this.saleRepository.findOne({
       where: { id, status: SaleStatus.DRAFT },
       relations: ['items', 'items.product'],
@@ -299,9 +305,29 @@ export class SalesService {
       await this.productsService.updateStock(item.productId, -item.quantity);
     }
 
+    // Update payment info if provided
+    if (completeDto) {
+      if (completeDto.paymentMethod) {
+        draft.paymentMethod = completeDto.paymentMethod as any;
+      }
+      if (completeDto.customerName !== undefined) {
+        draft.customerName = completeDto.customerName;
+      }
+      if (completeDto.customerPhone !== undefined) {
+        draft.customerPhone = completeDto.customerPhone;
+      }
+      if (completeDto.notes !== undefined) {
+        draft.notes = completeDto.notes;
+      }
+    }
+
     // Update status to completed
     draft.status = SaleStatus.COMPLETED;
-    await this.saleRepository.save(draft);
+    const savedDraft = await this.saleRepository.save(draft);
+    console.log(`✅ Draft ${id} completed.`);
+    console.log(`   - Status: ${savedDraft.status}`);
+    console.log(`   - SellerId: ${savedDraft.sellerId}`);
+    console.log(`   - SaleNumber: ${savedDraft.saleNumber}`);
 
     return await this.findOne(id);
   }

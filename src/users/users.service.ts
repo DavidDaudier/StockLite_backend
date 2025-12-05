@@ -128,4 +128,30 @@ export class UsersService {
 
     return stats;
   }
+
+  async changePassword(id: string, currentPassword: string, newPassword: string): Promise<{ message: string }> {
+    // Récupérer l'utilisateur avec le mot de passe
+    const user = await this.userRepository.findOne({
+      where: { id },
+      select: ['id', 'password'],
+    });
+
+    if (!user) {
+      throw new NotFoundException('Utilisateur non trouvé');
+    }
+
+    // Vérifier le mot de passe actuel
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isPasswordValid) {
+      throw new BadRequestException('Mot de passe actuel incorrect');
+    }
+
+    // Hasher le nouveau mot de passe
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Mettre à jour le mot de passe
+    await this.userRepository.update(id, { password: hashedPassword });
+
+    return { message: 'Mot de passe modifié avec succès' };
+  }
 }
